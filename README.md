@@ -20,6 +20,20 @@
 - Post1 -> User1
 - Post2 -> User1
 - Post3 -> User1
+- 굳이 맵핑시킬 아이디를 만들 필요는 없네?
+  - ManyToOne하는 쪽에서 Id를 가지고있음
+    - 반대로는 가져올 수 없음
+
+```ts
+  @ManyToOne(() => User, (user) => user.posts)
+  @JoinColumn()
+  author: User;
+
+...
+
+  @OneToMany(() => Post, (post) => post.author)
+  posts: Post[];
+```
 
 ### Many to Many
 

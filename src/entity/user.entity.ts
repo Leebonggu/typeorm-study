@@ -7,8 +7,10 @@ import {
   VersionColumn,
   Generated,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Profile } from './profile.entity';
+import { Post } from './post.entity';
 
 export enum Role {
   USER = 'user',
@@ -104,4 +106,7 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
+
+  @OneToMany(() => Post, (post) => post.author)
+  posts: Post[];
 }

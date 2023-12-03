@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entity/user.entity';
 import { Repository } from 'typeorm';
 import { Profile } from './entity/profile.entity';
+import { Post as PostEntity } from './entity/post.entity';
+import { Tag } from './entity/tag.entity';
 
 @Controller()
 export class AppController {
@@ -11,6 +13,10 @@ export class AppController {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    @InjectRepository(PostEntity)
+    private readonly postRepository: Repository<PostEntity>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
   ) {}
 
   @Get('users')
@@ -55,5 +61,43 @@ export class AppController {
       user,
       profile,
     };
+  }
+
+  @Post('posts/tags')
+  async createPostAndTags() {
+    const tag1 = await this.tagRepository.save({
+      name: 'tag1',
+    });
+    const tag2 = await this.tagRepository.save({
+      name: 'tag2',
+    });
+    await this.postRepository.save({
+      title: 'post1',
+      tags: [tag1, tag2],
+    });
+    await this.postRepository.save({
+      title: 'post2',
+      tags: [tag1],
+    });
+
+    return true;
+  }
+
+  @Get('posts')
+  async getPosts() {
+    return this.postRepository.find({
+      relations: {
+        tags: true,
+      },
+    });
+  }
+
+  @Get('tags')
+  async getTags() {
+    return this.tagRepository.find({
+      relations: {
+        posts: true,
+      },
+    });
   }
 }
