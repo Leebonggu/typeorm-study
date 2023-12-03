@@ -6,7 +6,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
   Generated,
+  OneToOne,
 } from 'typeorm';
+import { Profile } from './profile.entity';
 
 export enum Role {
   USER = 'user',
@@ -35,7 +37,7 @@ export class User {
      * 컬럼 이름
      * 프로퍼니 이름으로 자동 유추
      */
-    name: 'title',
+    name: 'email',
     /**
      * 실제 입력할 수 있는 값의 길이
      */
@@ -64,7 +66,7 @@ export class User {
      */
     unique: false,
   })
-  title: string;
+  email: string;
 
   /**
    * enum 타입
@@ -99,4 +101,7 @@ export class User {
   })
   @Generated('increment')
   additionalId: number;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
 }
