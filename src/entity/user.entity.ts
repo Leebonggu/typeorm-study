@@ -104,7 +104,21 @@ export class User {
   @Generated('increment')
   additionalId: number;
 
-  @OneToOne(() => Profile, (profile) => profile.user)
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    // find할 때  profile도 같이 가져옴
+    eager: false,
+    // 저장할 때 raleted된 profile도 같이 저장
+    cascade: true,
+    // default true
+    nullable: true,
+    // 관계가 삭제 했을 떄 onDelete: '',
+    // CASCADE 참조하는 테이블의 데이터도 같이 삭제
+    // SET NULL 참조하는 테이블의 데이터를 null로 변경
+    // RESTRICT 참조하는 테이블의 데이터가 있으면 삭제 불가
+    // NO ACTION CASCADE와 같음
+    // SET DEFAULT 참조하는 테이블의 데이터를 default 값으로 변경 (테이블에 설정된 기본설정값)
+    onDelete: 'CASCADE',
+  })
   profile: Profile;
 
   @OneToMany(() => Post, (post) => post.author)

@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entity/user.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Like, Not, Repository, ILike, IsNull } from 'typeorm';
 import { Profile } from './entity/profile.entity';
 import { Post as PostEntity } from './entity/post.entity';
 import { Tag } from './entity/tag.entity';
@@ -22,17 +22,51 @@ export class AppController {
   @Get('users')
   users() {
     return this.userRepository.find({
-      relations: {
-        profile: true,
+      /**
+       * 어떤 프로퍼티를 가져올지
+       * 기본은 다 가져옴
+       * select를 정의하면 선택된 프로퍼티만 가져옴
+       * */
+      select: {},
+      /**
+       * 필터링할 조건을 입력하게 된다.
+       * 전부 and 조건으로 처리된다.
+       * or는 [{}, {}] 형식으로 주면된다.
+       */
+      where: {
+        // id: Not('e369649f-21fa-46b3-9789-94691fdfa6ef'), // 아닌경우
+        // id: LessThan() 작은 경우
+        // id: MoreThan() 큰 경우
+        // email: Like('%@google.com'), // 유사한 경우
+        // email: ILike('%@google.com'), // 유사한 경우 + 대소문자 구분없음
       },
+      /**
+       * relation을 가져올 수 있다.
+       * relation을 추가하면 select, where에서도 사용가능하다.
+       */
+      relations: {},
+      /**
+       * ASC 오름차, DESC 내림차
+       */
+      order: {},
+      /**
+       * 처음 몇 개를 제외할 떄
+       */
+      skip: 0,
+      /**
+       * 몇개를 가져올지
+       */
+      take: 0,
     });
   }
 
   @Post('users')
-  create() {
-    return this.userRepository.save({
-      role: Role.ADMIN,
-    });
+  async create() {
+    for (let i = 0; i < 10; i++) {
+      await this.userRepository.save({
+        email: 'user' + i + '@google.com',
+      });
+    }
   }
 
   @Patch('users/:id')
@@ -85,19 +119,16 @@ export class AppController {
 
   @Get('posts')
   async getPosts() {
-    return this.postRepository.find({
-      relations: {
-        tags: true,
-      },
-    });
+    return this.postRepository.find();
   }
 
   @Get('tags')
   async getTags() {
-    return this.tagRepository.find({
-      relations: {
-        posts: true,
-      },
-    });
+    return this.tagRepository.find();
+  }
+
+  @Delete('user/profile')
+  async deleteProfile(@Param('id') id: string) {
+    await this.profileRepository.delete({ id: +id });
   }
 }
