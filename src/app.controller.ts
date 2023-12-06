@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entity/user.entity';
-import { LessThan, Like, Not, Repository, ILike, IsNull } from 'typeorm';
+import { ILike, In, LessThan, Repository } from 'typeorm';
 import { Profile } from './entity/profile.entity';
 import { Post as PostEntity } from './entity/post.entity';
 import { Tag } from './entity/tag.entity';
@@ -130,5 +130,65 @@ export class AppController {
   @Delete('user/profile')
   async deleteProfile(@Param('id') id: string) {
     await this.profileRepository.delete({ id: +id });
+  }
+
+  @Post('sample')
+  async sample() {
+    // 모델에 해당되는 객체생성 -> 저장은 안함
+    const user1 = this.userRepository.create({
+      email: 'hello@naver.com',
+    });
+
+    // 생성 + 저장
+    const user2 = this.userRepository.save({
+      email: 'hello@naver.com',
+    });
+
+    // prepare를 사용하면 저장은 안하고 객체만 생성
+    // 렵된 값을 기반으로 데이터베이스에 있는 데이터를 불러오고, 추가 입력된 값으로 데이터베이스에서 가져온 값을들 대체
+    // 저장은 안함
+    const user3 = this.userRepository.preload({
+      id: 'uuid',
+      email: 'hello@naver.com',
+    });
+
+    // 삭제
+    this.userRepository.delete({ id: 'uuid' });
+
+    // 증가
+    await this.userRepository.increment({ id: 'uuid' }, 'count', 1);
+
+    // 감소
+    await this.userRepository.decrement({ id: 'uuid' }, 'count', 1);
+
+    //개수
+    const count = await this.userRepository.count({
+      where: {
+        email: ILike('%@naver.com'),
+      },
+    });
+
+    // 합계
+    const sum = await this.userRepository.sum('count', {
+      email: ILike('%@naver.com'),
+    });
+
+    // 평균
+    const avg = await this.userRepository.average('count', {
+      email: In(['']),
+    });
+
+    // 최소
+    const min = await this.userRepository.minimum('count', {
+      email: In(['']),
+    });
+
+    // 최대
+    const max = await this.userRepository.maximum('count', {
+      email: In(['']),
+    });
+
+    // 찾고 + 개수
+    const usersAndCound = await this.userRepository.findAndCount({ take: 3 });
   }
 }

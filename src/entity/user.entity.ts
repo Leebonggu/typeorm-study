@@ -98,6 +98,11 @@ export class User {
   version: number;
 
   @Column({
+    default: 0,
+  })
+  count: number;
+
+  @Column({
     update: false,
     select: false,
   })
